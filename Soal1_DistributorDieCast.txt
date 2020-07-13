@@ -1,0 +1,76 @@
+mysql> use retrowheels
+
+mysql> select count(customerNumber) as Customers, count(distinct city) as Cities, count(distinct country) as Countries from customers;
++-----------+--------+-----------+
+| Customers | Cities | Countries |
++-----------+--------+-----------+
+|       122 |     95 |        27 |
++-----------+--------+-----------+
+1 row in set (0.00 sec)
+
+mysql> select count(employeeNumber) as Employees, count(distinct officeCode) as Offices, count(distinct country) as Country,
+    -> (select count(productCode) from products) as Products, (select sum(quantityInStock) from products) as StockProducts, (select count(distinct productVendor) from products) as Vendors
+    -> from employees join offices using (officeCode);
++-----------+---------+---------+----------+---------------+---------+
+| Employees | Offices | Country | Products | StockProducts | Vendors |
++-----------+---------+---------+----------+---------------+---------+
+|        23 |       7 |       5 |      110 |        555131 |      13 |
++-----------+---------+---------+----------+---------------+---------+
+1 row in set (0.00 sec)
+
+mysql> select productLine, min(buyPrice) as minPrice, max(buyPrice) as maxPrice
+    -> from products join productlines using (productLine)
+    -> group by productLine;
++------------------+----------+----------+
+| productLine      | minPrice | maxPrice |
++------------------+----------+----------+
+| Classic Cars     |    15.91 |   103.42 |
+| Motorcycles      |    24.14 |    91.02 |
+| Planes           |    29.34 |    77.27 |
+| Ships            |    33.30 |    82.34 |
+| Trains           |    26.72 |    67.56 |
+| Trucks and Buses |    24.92 |    84.76 |
+| Vintage Cars     |    20.61 |    86.70 |
++------------------+----------+----------+
+7 rows in set (0.00 sec)
+
+mysql> select customerName, city, country, sum(amount) as total
+    -> from customers join payments using (customerNumber)
+    -> group by customerName
+    -> order by total desc
+    -> limit 10;
++------------------------------+---------------+-------------+-----------+
+| customerName                 | city          | country     | total     |
++------------------------------+---------------+-------------+-----------+
+| Euro+ Shopping Channel       | Madrid        | Spain       | 715738.98 |
+| Mini Gifts Distributors Ltd. | San Rafael    | USA         | 584188.24 |
+| Australian Collectors, Co.   | Melbourne     | Australia   | 180585.07 |
+| Muscle Machine Inc           | NYC           | USA         | 177913.95 |
+| Dragon Souveniers, Ltd.      | Singapore     | Singapore   | 156251.03 |
+| Down Under Souveniers, Inc   | Auckland      | New Zealand | 154622.08 |
+| AV Stores, Co.               | Manchester    | UK          | 148410.09 |
+| Anna's Decorations, Ltd      | North Sydney  | Australia   | 137034.22 |
+| Corporate Gift Ideas Co.     | San Francisco | USA         | 132340.78 |
+| Saveley & Henriot, Co.       | Lyon          | France      | 130305.35 |
++------------------------------+---------------+-------------+-----------+
+10 rows in set (0.00 sec)
+
+mysql> select customers.customerName as customerName, products.productName as productName, orderdetails.quantityOrdered as quantityOrdered, orderdetails.priceEach as priceEach
+    -> from customers, products, orderdetails, orders, payments
+    -> where customers.customerNumber = payments.customerNumber
+    -> and customers.customerNumber = orders.customerNumber
+    -> and orders.orderNumber = orderdetails.orderNumber
+    -> and orderdetails.productCode = products.productCode
+    -> and payments.paymentDate = '2003-06-05'
+    -> and orders.orderDate < '2003-06-05';
++-------------------+--------------------------------+-----------------+-----------+
+| customerName      | productName                    | quantityOrdered | priceEach |
++-------------------+--------------------------------+-----------------+-----------+
+| Atelier graphique | 1965 Aston Martin DB5          |              26 |    120.71 |
+| Atelier graphique | 1999 Indy 500 Monte Carlo SS   |              46 |    114.84 |
+| Atelier graphique | 1948 Porsche Type 356 Roadster |              34 |    117.26 |
+| Atelier graphique | 1966 Shelby Cobra 427 S/C      |              50 |     43.27 |
++-------------------+--------------------------------+-----------------+-----------+
+4 rows in set (0.00 sec)
+
+mysql>
